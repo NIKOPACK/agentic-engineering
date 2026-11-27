@@ -1,5 +1,7 @@
 # This repository lints itself with the same Ruff rules it ships to projects.
 extend = "templates/python/ruff.toml"
+# scripts/ modules import each other by bare name (kitlib, skills).
+src = ["scripts", "tests"]
 
 [lint.extend-per-file-ignores]
 # The kit's tests use stdlib unittest so they run without third-party packages.

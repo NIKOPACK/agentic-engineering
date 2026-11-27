@@ -11,7 +11,13 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 INSTALL = ROOT / "scripts" / "install.py"
-SKILLS = sorted(p.name for p in (ROOT / "agent" / "skills").iterdir() if (p / "SKILL.md").is_file())
+sys.path.insert(0, str(ROOT / "scripts"))
+
+from kitlib import Catalog  # noqa: E402
+
+CATALOG = Catalog()
+CORE = list(CATALOG.profiles["core"].skills)
+NON_DEFAULT = sorted(set(CATALOG.skills) - set(CORE))
 
 
 class InstallTests(unittest.TestCase):
@@ -62,11 +68,47 @@ class InstallTests(unittest.TestCase):
         ):
             with self.subTest(path=relative):
                 self.assertTrue((self.target / relative).is_file(), relative)
-        for name in SKILLS:
+        for name in CORE:
             self.assertTrue((self.target / ".agents/skills" / name / "SKILL.md").is_file())
             link = self.target / ".claude/skills" / name
             self.assertTrue(link.is_symlink())
             self.assertTrue((link / "SKILL.md").is_file(), "symlink must resolve")
+
+    def test_only_default_profile_skills_by_default(self) -> None:
+        self.install()
+        installed = sorted(p.name for p in (self.target / ".agents/skills").iterdir())
+        self.assertEqual(installed, sorted(CORE))
+        for name in NON_DEFAULT:
+            self.assertFalse((self.target / ".agents/skills" / name).exists())
+
+    def test_profile_and_skill_selection(self) -> None:
+        self.install("--profile", "kit", "--skill", "verify-change")
+        installed = sorted(p.name for p in (self.target / ".agents/skills").iterdir())
+        self.assertEqual(installed, sorted(["adopt-standards", "verify-change"]))
+
+    def test_no_skills(self) -> None:
+        self.install("--no-skills")
+        self.assertFalse((self.target / ".agents/skills").exists())
+
+    def test_unknown_profile_is_an_error(self) -> None:
+        result = subprocess.run(
+            [sys.executable, str(INSTALL), "--target", str(self.target), "--profile", "nope"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("unknown profile", result.stderr)
+
+    def test_upgrade_refreshes_installed_skills_only(self) -> None:
+        self.install("--skill", "verify-change", "--agents", "codex")
+        skill_md = self.target / ".agents/skills/verify-change/SKILL.md"
+        skill_md.write_text("stale\n")
+        output = self.install("--upgrade", "--agents", "codex")
+        self.assertIn("update  .agents/skills/verify-change", output)
+        self.assertNotEqual(skill_md.read_text(), "stale\n")
+        installed = sorted(p.name for p in (self.target / ".agents/skills").iterdir())
+        self.assertEqual(installed, ["verify-change"])
 
     def test_installed_guard_works_from_project(self) -> None:
         self.install("--agents", "claude")
@@ -121,7 +163,7 @@ class InstallTests(unittest.TestCase):
 
     def test_copy_skills(self) -> None:
         self.install("--agents", "claude", "--copy-skills")
-        skill = self.target / ".claude/skills" / SKILLS[0]
+        skill = self.target / ".claude/skills" / CORE[0]
         self.assertFalse(skill.is_symlink())
         self.assertTrue((skill / "SKILL.md").is_file())
 

@@ -1,6 +1,6 @@
 ---
 name: adopt-standards
-description: Bring a repository in line with the agentic-engineering standards by auditing its current tooling, installing the shared kit (AGENTS.md, skills, guard hooks for Codex, Claude Code and pi, stack configs, CI) without overwriting existing files, and filling AGENTS.md with the project's real commands. Use when the user asks to set up, adopt or update these development standards in a project. Do not use for ordinary feature work.
+description: Bring a repository in line with the agentic-engineering standards by auditing its current tooling, installing the shared kit (AGENTS.md, guard hooks for Codex, Claude Code and pi, stack configs, CI, and the skills the project needs) without overwriting existing files, and filling AGENTS.md with the project's real commands. Use when the user asks to set up, adopt or update these development standards in a project. Do not use for ordinary feature work.
 ---
 
 # Adopt Standards
@@ -13,18 +13,19 @@ Install the agentic-engineering kit into the current repository and tailor it, k
 2. Run `git status --short`; treat existing changes as the user's and do not touch them.
 3. Detect the stack from manifests: `package.json` and lockfiles (TypeScript/Node), `pyproject.toml` or `requirements*.txt` (Python), `go.mod` (Go).
 4. Inventory current tooling: formatter, linter, type checker, test runner, CI workflows, pre-commit hooks, `.codex/`, `.claude/`, `.pi/`, `.agents/`.
-5. Tell the user what exists and which kit parts would be added, then confirm the stacks and agents to install.
+5. Run `python3 <kit>/scripts/skills.py list` to see the skill categories and profiles. Pick the profiles and individual skills this project needs: the default `core` profile always, plus skills that match the project's stack and domain.
+6. Tell the user what exists and which kit parts and skills would be added, then confirm the stacks, agents and skills to install.
 
 ## 2. Install the kit
 
 Locate the kit: a local clone of `https://github.com/NIKOPACK/agentic-engineering`, or clone it into a temporary directory. Preview with `--dry-run`, then run the installer from the target repository root:
 
 ```bash
-python3 <kit>/scripts/install.py --target . --stack <typescript,python,go> --agents <codex,claude,pi> --dry-run
-python3 <kit>/scripts/install.py --target . --stack <typescript,python,go> --agents <codex,claude,pi>
+python3 <kit>/scripts/install.py --target . --stack <typescript,python,go> --agents <codex,claude,pi> --profile core --skill <extra,skills> --dry-run
+python3 <kit>/scripts/install.py --target . --stack <typescript,python,go> --agents <codex,claude,pi> --profile core --skill <extra,skills>
 ```
 
-The installer never overwrites files; `--upgrade` refreshes only the kit-managed guard, skills and pi extension. On Windows add `--copy-skills`. Read its output: every `skip` line is an existing file you must reconcile by hand.
+Skills chosen later go in with `python3 <kit>/scripts/skills.py install --target . --skill <name>`. The installer never overwrites files; `--upgrade` refreshes only the kit-managed guard, the pi extension and the kit skills already installed. On Windows add `--copy-skills`. Read its output: every `skip` line is an existing file you must reconcile by hand.
 
 ## 3. Reconcile skipped files
 
@@ -42,4 +43,4 @@ Replace every `<placeholder>` in `AGENTS.md` with facts from the repository: the
 1. Run the commands you wrote into `AGENTS.md`.
 2. Feed one blocked and one allowed sample through the guard, for example `echo '{"tool_name":"Bash","tool_input":{"command":"git push --force"},"cwd":"."}' | python3 .agents/hooks/policy.py` (expect exit code 2).
 3. Remind the user of the one-time steps only they can do: trust the project and review hooks with `/hooks` in Codex; approve the project hooks when Claude Code asks; run `pre-commit install`.
-4. Report what was installed, what was merged, what was skipped and why.
+4. Report what was installed (including which skills, and `skills.py status --target .`), what was merged, what was skipped and why.

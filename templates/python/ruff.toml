@@ -16,6 +16,8 @@ select = [
   "RUF",     # ruff-specific
 ]
 ignore = ["E501"]  # the formatter owns line length
+# Chinese punctuation in strings and comments is intended, not a confusable character.
+allowed-confusables = ["（", "）", "，", "：", "；", "！", "？"]
 
 [lint.per-file-ignores]
 "tests/**" = ["S101", "S603", "S607"]  # pytest asserts; tests run trusted commands

@@ -1,0 +1,69 @@
+# Skill catalog: categories, install profiles and provenance of imported skills.
+#
+# - A skill lives at skills/<category>/<name>/; its directory decides its category.
+# - Name, description and display text come from the skill's own SKILL.md and
+#   agents/openai.yaml, so they are written only once.
+# - After editing, run `python3 scripts/skills.py catalog --write` and `make check`.
+
+# ----------------------------------------------------------------------------- categories
+# Defined up front so new skills have an obvious home. A category may stay empty.
+
+[categories.workflow]
+title = "通用开发流程"
+description = "规格、验证、审查、提交等每个项目都用得上的流程"
+
+[categories.kit]
+title = "规范接入与维护"
+description = "接入、升级本规范；建议全局安装，不装进项目"
+
+[categories.frontend]
+title = "前端与 UI"
+description = "组件、样式、可访问性、浏览器验证"
+
+[categories.backend]
+title = "后端与 API"
+description = "接口设计、数据库、迁移、性能"
+
+[categories.testing]
+title = "测试与调试"
+description = "测试策略、端到端测试、排查与调试"
+
+[categories.devops]
+title = "构建、部署与运维"
+description = "CI/CD、容器、云资源、监控、发布"
+
+[categories.data]
+title = "数据与 AI 应用"
+description = "数据处理与分析、LLM 应用、提示词与评测"
+
+[categories.docs]
+title = "文档与写作"
+description = "README、API 文档、变更日志、技术方案"
+
+[categories.security]
+title = "安全"
+description = "威胁建模、依赖审计、安全审查"
+
+[categories.stacks]
+title = "语言与框架"
+description = "某种语言或框架的惯用法与最佳实践"
+
+# ----------------------------------------------------------------------------- profiles
+# Named bundles installed together. Profiles with default = true are installed
+# when no --profile or --skill is given.
+
+[profiles.core]
+description = "每个项目都装：规格先行、验证、自审、提交"
+default = true
+skills = ["spec-first", "verify-change", "self-review", "ship-change"]
+
+[profiles.kit]
+description = "全局安装，用来给项目接入或升级本规范"
+skills = ["adopt-standards"]
+
+# ----------------------------------------------------------------------------- provenance
+# Required for every skill taken from elsewhere (one that ships its own LICENSE file):
+#
+# [skills.some-skill]
+# source = "https://github.com/owner/repo/tree/<commit>/skills/some-skill"
+# license = "Apache-2.0"

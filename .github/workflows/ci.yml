@@ -21,14 +21,14 @@ jobs:
       - run: make check
 
   guard-python39:
-    # The shipped guard and installer promise Python 3.9 compatibility.
+    # The guard runs inside agent sessions on users' machines and promises Python 3.9 compatibility.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
         with:
           python-version: "3.9"
-      - run: python -m unittest discover -s tests
+      - run: python -m unittest discover -s tests -p test_policy.py
 
   pi-extension:
     runs-on: ubuntu-latest
