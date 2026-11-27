@@ -1,0 +1,4 @@
+interface:
+  display_name: "接入开发规范"
+  short_description: "把 agentic-engineering 规范与工具安装到当前仓库"
+  default_prompt: "使用 $adopt-standards 审计当前仓库并接入 agentic-engineering 开发规范。"

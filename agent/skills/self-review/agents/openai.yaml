@@ -1,0 +1,4 @@
+interface:
+  display_name: "自我审查"
+  short_description: "交付前像严格的审查者一样审查自己的 diff"
+  default_prompt: "使用 $self-review 审查当前改动的正确性、测试、安全和范围，修复问题后再交付。"

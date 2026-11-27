@@ -1,0 +1,5 @@
+{
+  "protected_branches": ["main", "master"],
+  "disabled_rules": [],
+  "extra_secret_patterns": []
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "规格先行"
+  short_description: "非平凡改动先写规格与验收标准，确认后再实现"
+  default_prompt: "使用 $spec-first 为这个需求写规格说明和验收标准，确认后再开始实现。"

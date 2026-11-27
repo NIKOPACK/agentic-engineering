@@ -1,0 +1,57 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - uses: astral-sh/setup-uv@v10.4.0
+      - run: pip install pyyaml
+      - run: make check
+
+  guard-python39:
+    # The shipped guard and installer promise Python 3.9 compatibility.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.9"
+      - run: python -m unittest discover -s tests
+
+  pi-extension:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Type check against the published pi API
+        run: |
+          mkdir -p /tmp/pi-check && cd /tmp/pi-check
+          npm init -y >/dev/null
+          npm i --no-audit --no-fund @mariozechner/pi-coding-agent typescript @types/node
+          cp "$GITHUB_WORKSPACE/agent/pi/extensions/agent-policy.ts" .
+          npx tsc --noEmit --strict --module nodenext --moduleResolution nodenext --target es2022 --skipLibCheck agent-policy.ts
+
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - uses: pre-commit/action@v3.0.1
+        with:
+          extra_args: --all-files --config templates/common/.pre-commit-config.yaml

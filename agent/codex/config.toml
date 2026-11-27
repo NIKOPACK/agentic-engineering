@@ -1,0 +1,11 @@
+# Project-scoped Codex settings from agentic-engineering.
+# Codex loads this file (and .codex/hooks.json) only after the project is trusted.
+# Review and trust the hooks once with `/hooks` in the Codex CLI.
+
+# Ask before leaving the sandbox; never run unattended with full access.
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+
+[sandbox_workspace_write]
+# Package installs and other network calls go through an approval prompt.
+network_access = false

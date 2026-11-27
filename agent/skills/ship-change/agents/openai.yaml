@@ -1,0 +1,4 @@
+interface:
+  display_name: "提交与 PR"
+  short_description: "按 Conventional Commits 提交并按模板创建 PR"
+  default_prompt: "使用 $ship-change 在功能分支上提交已验证的改动并推送。"
